@@ -19,10 +19,11 @@ class Expendo():
         b. Press 2 to view your expenditure statement.(Last 5 expenses)
         c. Press 3 to add an expenditure. 
         d. Press 4 to add money saved for the month.
-        e. Press 5 to delete an entry. 
+        e. Press 5 to delete the latest entry. #Accountability for your spendings.
         f. Press 6 to update an entry.
-        g. Press 7 for visualization of your financial situation. 
-        h. Press Q to quit the program.
+        g. Press 7 to view an expenditure.
+        h. Press 7 for visualization of your financial situation. 
+        i. Press Q to quit the program.
         """)
     
         try:
@@ -48,7 +49,7 @@ class Expendo():
                 self.cur = con.cursor() #Cursor.
             
             #Checking for and creating a table if it doesnt exist.
-            self.cur.execute("CREATE TABLE IF NOT EXISTS expenses(ID_Date DATETIME DEFAULT CURRENT_TIMESTAMP, Expenditure_TAG TEXT NOT NULL, Expense REAL NOT NULL")
+            self.cur.execute("CREATE TABLE IF NOT EXISTS expenses(ID INTEGER PRIMARY KEY AUTOINCREMENT,ID_Date DATETIME DEFAULT CURRENT_TIMESTAMP, Expenditure_TAG TEXT NOT NULL, Expense REAL NOT NULL")
             self.con.commit()
             print("Loaded/Created {} database!".format(db_name))
         except Exception as e:
@@ -103,17 +104,32 @@ class Expendo():
                 filename = input("Enter name of your file: ")
                 filepath = dir_path + r"\{}.txt".format
                 if (os.path.getsize(filepath)) == 0:
-                self.bank = input("Your salary file is empty. Enter your salary: ")
-                with open(filepath, 'w') as f:
-                    f.write(self.bank)
-                    f.close()
+                    self.bank = input("Your salary file is empty. Enter your salary: ")
+                    with open(filepath, 'w') as f:
+                        f.write(self.bank)
+                        f.close()
                 else:
                     with open(filepath, 'r') as f:
                         self.bank = f.read()
                         f.close()
                 print("Loaded your amount available for the month!")
+        
+        except Exception as e:
+            print("There was a program error: ", e)
             
+    #Deleting an entry.
+    def delete_entry(self):
+        try:
+            self.cur.execute("DELETE FROM expenses WHERE id = (SELECT MAX(id) FROM expenses)")
+            print('Deleted the latest entry!')
+        except Exception as e:
+            print("There was a program error: ", e)
     
+    def update_entry():
+
+
+
+        
 
 
 
@@ -121,7 +137,7 @@ class Expendo():
 
 
         
-exp1 = Expendo()
-exp1.exp_statement()
+#exp1 = Expendo()
+#exp1.exp_statement()
 
     
