@@ -1,10 +1,14 @@
 import os
 import sqlite3 as sq 
 from matplotlib import pyplot as plt 
+import sys
+import traceback
 
 class Expendo():
     def __init__(self):
         self.bank = None #Object that takes care of cash flow in
+        self.conn = None
+        self.cur = None
         print("""
         |--------------------------EXPENDO-------------------------|
         |                     Welcome to Expendo!                  |
@@ -38,18 +42,18 @@ class Expendo():
             #Creating a new database.
             if db_choice == "C":
                 db_name = input("Name your database! : ").lower()
-                self.con = sq.connect("{}.db".format(db_name)) #Establishing connection with database.
-                self.cur = con.cursor() #Cursor.
+                self.conn = sq.connect("{}.db".format(db_name)) #Establishing connection with database.
+                self.cur = self.conn.cursor() #Cursor.
             
             #Loading the pre-existing database.
             elif db_choice == "L":
                 db_name = input("Name of your database! : ").lower()
-                self.con = sq.connect("{}.db".format(db_name)) #Establishing connection with database.
-                self.cur = con.cursor() #Cursor.
+                self.conn = sq.connect("{}.db".format(db_name)) #Establishing connection with database.
+                self.cur = self.conn.cursor() #Cursor.
             
             #Checking for and creating a table if it doesnt exist.
-            self.cur.execute("CREATE TABLE IF NOT EXISTS expenses(ID INTEGER PRIMARY KEY AUTOINCREMENT,ID_Date DATETIME DEFAULT CURRENT_TIMESTAMP, Expenditure_TAG TEXT NOT NULL, Expense REAL NOT NULL")
-            self.con.commit()
+            self.cur.execute("CREATE TABLE IF NOT EXISTS expenses(ID INTEGER PRIMARY KEY AUTOINCREMENT,ID_Date DATETIME DEFAULT CURRENT_TIMESTAMP, Expenditure_TAG TEXT NOT NULL, Expense REAL NOT NULL)")
+            self.conn.commit()
             print("Loaded/Created {} database!".format(db_name))
         except Exception as e:
             print("There was a program error: ", e)
@@ -94,7 +98,7 @@ class Expendo():
 
                 #Adding the data.
                 self.cur.execute("INSERT INTO expenses (Expenditure_TAG, Expense) VALUES(?,?)", (Expenditure_TAG, Expenditure))
-                self.con.commit()
+                self.conn.commit()
 
                 #Addition of more data.
                 continuation = input("Do you want to enter more expenses?[Y/N]: ").upper()
@@ -152,7 +156,7 @@ class Expendo():
             updated_expense = float(input("Enter the new expense value: "))
             updated_tag = input("Enter the tag for the expense: ").upper()
             self.cur.execute("UPDATE expenses SET Expenditure_TAG = ?, Expense = ? where ID = ?", (updated_tag, updated_expense, update_entry))
-            self.con.commit()
+            self.conn.commit()
             print("Updated the emtry!")
         except Exception as e:
             print("There was a program error: ", e)

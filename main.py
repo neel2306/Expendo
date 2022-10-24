@@ -2,11 +2,13 @@ import os
 import sqlite3 as sq 
 from matplotlib import pyplot as plt 
 from expendo import Expendo
+import sys
+import traceback
 
 def main():
     expendo_menu = Expendo()
 
-    menu_choice = Expendo.user_choice()
+    menu_choice = expendo_menu.user_choice()
     while menu_choice != 'Q':
         if menu_choice == 1:
             expendo_menu.load_db()
@@ -22,4 +24,7 @@ def main():
             expendo_menu.update_entry()
         elif menu_choice==7:
             expendo_menu.visuals()
+        menu_choice = expendo_menu.user_choice()
         
+if __name__ == '__main__':
+    main()
