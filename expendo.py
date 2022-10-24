@@ -167,30 +167,49 @@ class Expendo():
     #Visualizations for the same.
     def visuals(self):
         try:
-            #Sum of all the expenses
-            print("")
-            for row in self.cur.execute("SELECT TOTAL(Expense) FROM expenses"):
-                agg_expense = row[0]
-            #List of attributes to be plotted.
-            y_list = [self.bank, agg_expense]
-            labels = ["Money Bank", "Expenses"]
-            plt.pie(y_list, labels=labels)
+            print('''
+            |------------------------VISUALS-------------------------|
+            a. Press 1 to see a bar plot of all your spendings categorised by their tags.
+            b. Press 2 to see a pie-chart of all your spendings categorised by their tags.
+            c. Press 3 to see a pie-chart of your spendings vs your monthly bank.
+            ''')
+            visual_choice = int(input("Enter yuor choice: "))
+            labels = []
+            values = []
+            if visual_choice == 1:
+                for row in self.cur.execute("SELECT Expenditure_TAG,SUM(Expense) FROM expenses GROUP BY Expenditure_TAG"):
+                    for i in range(1,len(row)+1,2):
+                        labels.append(row[i-1])
+                        values.append(row[i])
+                plt.barh(labels, values, color = "hotpink")
+                plt.xlabel("Financial Log")
+                plt.ylabel("Money (INR)")
+                plt.title("Expenditure Category")
+                for a,b in zip(values, labels):
+                    plt.text(a,b,str(a))
+            elif visual_choice == 2:
+                for row in self.cur.execute("SELECT Expenditure_TAG,SUM(Expense) FROM expenses GROUP BY Expenditure_TAG"):
+                    for i in range(1,len(row)+1,2):
+                        labels.append(row[i-1])
+                        values.append(row[i])
+                plt.pie(values, labels = labels)
+                plt.title("Expenditure Category")
+                for a,b in zip(values, labels):
+                    plt.text(a,b,str(a))
+            elif visual_choice == 3:
+                for row in self.cur.execute("SELECT TOTAL(Expense) FROM expenses"):
+                    agg_expense = row[0]
+                #List of attributes to be plotted.
+                y_list = [self.bank, agg_expense]
+                p_labels = ["Money Bank", "Expenses"]
+                plt.pie(y_list, labels=p_labels)
+                plt.title("Allowance VS Expenditure")
+                for a,b in zip(y_list, p_labels):
+                    plt.text(a,b,str(a))
             plt.show()
         
-        except BaseException as ex:
-            ex_type, ex_value, ex_traceback = sys.exc_info()
-
-            # Extract unformatter stack traces as tuples
-            trace_back = traceback.extract_tb(ex_traceback)
-
-            # Format stacktrace
-            stack_trace = list()
-
-            for trace in trace_back:
-                stack_trace.append("File : %s , Line : %d, Func.Name : %s, Message : %s" % (trace[0], trace[1], trace[2], trace[3]))
-            print("Exception type : %s " % ex_type.__name__)
-            print("Exception message : %s" %ex_value)
-            print("Stack trace : %s" %stack_trace)
+        except Exception as e:
+            print("There was a program error: ", e)
 
 
 
