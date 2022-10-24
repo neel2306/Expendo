@@ -176,7 +176,5 @@ class Expendo():
 
 
         
-#exp1 = Expendo()
-#exp1.exp_statement()
 
     
