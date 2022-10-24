@@ -26,7 +26,7 @@ class Expendo():
         e. Press 5 to delete the latest entry. #Accountability for your spendings.
         f. Press 6 to update an entry.
         g. Press 7 for visualization of your financial situation. 
-        h. Press Q to quit the program.
+        h. Press 8 to quit the program.
         """)
     
         try:
@@ -72,19 +72,22 @@ class Expendo():
                 print('''
                 |------------------------STATEMENT-------------------------|
                 ''')
-                self.cur.execute("SELECT * FROM expenses WHERE ID = (SELECT MAX(ID) FROM expenses)")
+                for row in self.cur.execute("SELECT * FROM expenses WHERE ID = (SELECT MAX(ID) FROM expenses)"):
+                    print(row)
             elif view_choice == 2: #If the user wants to view hs whole statement log.
                 print('''
                 |------------------------STATEMENT-------------------------|
                 ''')
-                self.cur.execute("SELECT * FROM expenses")
+                for row in self.cur.execute("SELECT * FROM expenses"):
+                    print(row)
 
             elif view_choice == 3: #If the user wants to see his/her last n number of logs.
                 no_of_entries = int(input("How many latest entries do you want to see: "))
                 print('''
                 |------------------------STATEMENT-------------------------|
                 ''')
-                self.cur.execute("SELECT * FROM expenses ORDER BY ID DESC LIMIT ?", (no_of_entries))
+                for row in self.cur.execute("SELECT * FROM expenses ORDER BY ID DESC LIMIT ?", str(no_of_entries)):
+                    print(row)
         except Exception as e:
             print("There was a program error: ", e)
 
@@ -113,10 +116,10 @@ class Expendo():
         try:
             bank_choice = input("Enter a new monthly bank (N) | Load the existing monthly bank (L): ").upper()
             if bank_choice == "N": #Entering a new monthly bank
-                self.bank = float(input("Enter the amount available for this month: "))
+                self.bank = input("Enter the amount available for this month: ")
                 dir_path = os.path.dirname(os.path.realpath(__file__))
                 filename = input("Enter name of your file: ")
-                filepath = dir_path + r"\{}.txt".format
+                filepath = dir_path + r"\{}.txt".format(filename)
                  
                 with open(filepath,"w") as f:
                     f.write(self.bank)
@@ -126,7 +129,7 @@ class Expendo():
             elif bank_choice == "L": #Loading the existing bank account.
                 dir_path = os.path.dirname(os.path.realpath(__file__))
                 filename = input("Enter name of your file: ")
-                filepath = dir_path + r"\{}.txt".format
+                filepath = dir_path + r"\{}.txt".format(filename)
                 if (os.path.getsize(filepath)) == 0:
                     self.bank = input("Your salary file is empty. Enter your bank amount: ") #The bank amount isnt entered.
                     with open(filepath, 'w') as f:
@@ -166,15 +169,28 @@ class Expendo():
         try:
             #Sum of all the expenses
             print("")
-            agg_expense = self.cur.execute("SELECT TOTAL(Expense) FROM expenses")
+            for row in self.cur.execute("SELECT TOTAL(Expense) FROM expenses"):
+                agg_expense = row[0]
             #List of attributes to be plotted.
             y_list = [self.bank, agg_expense]
             labels = ["Money Bank", "Expenses"]
-            plt.pie(y_list, labels=labels, colors=('black,pink'))
+            plt.pie(y_list, labels=labels)
             plt.show()
         
-        except Exception as e:
-            print("There was a program error: ", e)
+        except BaseException as ex:
+            ex_type, ex_value, ex_traceback = sys.exc_info()
+
+            # Extract unformatter stack traces as tuples
+            trace_back = traceback.extract_tb(ex_traceback)
+
+            # Format stacktrace
+            stack_trace = list()
+
+            for trace in trace_back:
+                stack_trace.append("File : %s , Line : %d, Func.Name : %s, Message : %s" % (trace[0], trace[1], trace[2], trace[3]))
+            print("Exception type : %s " % ex_type.__name__)
+            print("Exception message : %s" %ex_value)
+            print("Stack trace : %s" %stack_trace)
 
 
 

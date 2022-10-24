@@ -9,7 +9,7 @@ def main():
     expendo_menu = Expendo()
 
     menu_choice = expendo_menu.user_choice()
-    while menu_choice != 'Q':
+    while menu_choice != '8':
         if menu_choice == 1:
             expendo_menu.load_db()
         elif menu_choice==2:
