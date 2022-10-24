@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 
 class Expendo():
     def __init__(self):
-        self.bank = None #Object that takes care of casgh flow in
+        self.bank = None #Object that takes care of cash flow in
         print("""
         |--------------------------EXPENDO-------------------------|
         |                     Welcome to Expendo!                  |
@@ -88,7 +88,7 @@ class Expendo():
     def add_expense(self):
         try:
             flag = True
-            while flag:
+            while flag: #Looping through so that the user doesnt have to go through the menu each time.
                 Expenditure_TAG = input("What kind of expenditure is this[Food, Grocery etc]: ").upper()
                 Expenditure = float(input("Enter the amount: "))
 
@@ -108,7 +108,7 @@ class Expendo():
     def month_bank(self):
         try:
             bank_choice = input("Enter a new monthly bank (N) | Load the existing monthly bank (L): ").upper()
-            if bank_choice == "N":
+            if bank_choice == "N": #Entering a new monthly bank
                 self.bank = float(input("Enter the amount available for this month: "))
                 dir_path = os.path.dirname(os.path.realpath(__file__))
                 filename = input("Enter name of your file: ")
@@ -119,12 +119,12 @@ class Expendo():
                     f.close()
                 print("Entered new lump sum available for the month!")
             
-            elif bank_choice == "L":
+            elif bank_choice == "L": #Loading the existing bank account.
                 dir_path = os.path.dirname(os.path.realpath(__file__))
                 filename = input("Enter name of your file: ")
                 filepath = dir_path + r"\{}.txt".format
                 if (os.path.getsize(filepath)) == 0:
-                    self.bank = input("Your salary file is empty. Enter your salary: ")
+                    self.bank = input("Your salary file is empty. Enter your bank amount: ") #The bank amount isnt entered.
                     with open(filepath, 'w') as f:
                         f.write(self.bank)
                         f.close()
@@ -145,7 +145,8 @@ class Expendo():
         except Exception as e:
             print("There was a program error: ", e)
     
-    def update_entry():
+    #Updating an entry.
+    def update_entry(self):
         try:
             update_entry = int(input("Enter the Row ID of the data entry you want to update: "))
             updated_expense = float(input("Enter the new expense value: "))
@@ -155,14 +156,21 @@ class Expendo():
             print("Updated the emtry!")
         except Exception as e:
             print("There was a program error: ", e)
-            
-
-
-
-
+    
+    #Visualizations for the same.
+    def visuals(self):
+        try:
+            #Sum of all the expenses
+            print("")
+            agg_expense = self.cur.execute("SELECT TOTAL(Expense) FROM expenses")
+            #List of attributes to be plotted.
+            y_list = [self.bank, agg_expense]
+            labels = ["Money Bank", "Expenses"]
+            plt.pie(y_list, labels=labels, colors=('black,pink'))
+            plt.show()
         
-
-
+        except Exception as e:
+            print("There was a program error: ", e)
 
 
 
