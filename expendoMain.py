@@ -54,15 +54,36 @@ class Expendo():
         except Exception as e:
             print("There was a program error: ", e)
     
-    #Function to show 5 latest expenditures.
+    #Function to show the user his/her statement log.
     def exp_statement(self):
         try:
-            print("-"*24,"Showing last 5 expenditures!", "-"*24)
-            self.cur.execute("SELECT * FROM expenses ORDER BY ID_Date DESC LIMIT 10")
-            self.con.commit()
+            print('''
+            |----------------------STATEMENT MENU----------------------|
+            a. Press 1 to view your latest expense.
+            b. Press 2 to view your whole statement.
+            c. Press 3 to view your n latest expenses.
+            ''')
+            view_choice = int(input("Please enter your choice: "))
+            if view_choice == 1: #If the user only wants to see his/her last entry.
+                print('''
+                |------------------------STATEMENT-------------------------|
+                ''')
+                self.cur.execute("SELECT * FROM expenses WHERE ID = (SELECT MAX(ID) FROM expenses)")
+            elif view_choice == 2: #If the user wants to view hs whole statement log.
+                print('''
+                |------------------------STATEMENT-------------------------|
+                ''')
+                self.cur.execute("SELECT * FROM expenses")
+
+            elif view_choice == 3: #If the user wants to see his/her last n number of logs.
+                no_of_entries = int(input("How many latest entries do you want to see: "))
+                print('''
+                |------------------------STATEMENT-------------------------|
+                ''')
+                self.cur.execute("SELECT * FROM expenses ORDER BY ID DESC LIMIT ?", (no_of_entries))
         except Exception as e:
             print("There was a program error: ", e)
-    
+
     #Function to add an expense.
     def add_expense(self):
         try:
