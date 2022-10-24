@@ -16,14 +16,13 @@ class Expendo():
         print("""
         |---------------------------MENU---------------------------|
         a. Press 1 to create/load your database.
-        b. Press 2 to view your expenditure statement.(Last 5 expenses)
+        b. Press 2 to view your expenditure statement.
         c. Press 3 to add an expenditure. 
         d. Press 4 to add money saved for the month.
         e. Press 5 to delete the latest entry. #Accountability for your spendings.
         f. Press 6 to update an entry.
-        g. Press 7 to view an expenditure.
-        h. Press 7 for visualization of your financial situation. 
-        i. Press Q to quit the program.
+        g. Press 7 for visualization of your financial situation. 
+        h. Press Q to quit the program.
         """)
     
         try:
@@ -126,6 +125,17 @@ class Expendo():
             print("There was a program error: ", e)
     
     def update_entry():
+        try:
+            update_entry = int(input("Enter the Row ID of the data entry you want to update: "))
+            updated_expense = float(input("Enter the new expense value: "))
+            updated_tag = input("Enter the tag for the expense: ").upper()
+            self.cur.execute("UPDATE expenses SET Expenditure_TAG = ?, Expense = ? where ID = ?", (updated_tag, updated_expense, update_entry))
+            self.con.commit()
+            print("Updated the emtry!")
+        except Exception as e:
+            print("There was a program error: ", e)
+            
+
 
 
 
