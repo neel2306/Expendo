@@ -1,42 +1,22 @@
 import os
+import time as t
 import sqlite3 as sq 
 from matplotlib import pyplot as plt 
-import sys
-import traceback
 
 class Expendo():
     def __init__(self):
-        self.bank = None #Object that takes care of cash flow in
-        self.conn = None
-        self.cur = None
+        self.bank = None #Object that takes care of cash flow in.
+        self.conn = None #Object that will helpestablish connection with the database.
+        self.cur = None #Cursor object to iterate through the databse.
         print("""
         |--------------------------EXPENDO-------------------------|
         |                     Welcome to Expendo!                  |
         |            One stop for all your money Management        |
         """)
     
-    #Funtion portraying the menu for Expendo and also taking in the user's input.
-    def user_choice(self):
-        print("""
-        |---------------------------MENU---------------------------|
-        a. Press 1 to create/load your database.
-        b. Press 2 to view your expenditure statement.
-        c. Press 3 to add an expenditure. 
-        d. Press 4 to add money saved for the month.
-        e. Press 5 to delete the latest entry. #Accountability for your spendings.
-        f. Press 6 to update an entry.
-        g. Press 7 for visualization of your financial situation. 
-        h. Press 8 to quit the program.
-        """)
-    
-        try:
-            choice = int(input("Enter your choice: "))
-            return choice
-        except:
-            print("Please enter a valid key next time!")
-    
     #Funtion to create/load the existing databases.
     def load_db(self):
+        #Asking user to create or initiate a new database.
         db_choice = input("Create a new database? (C) | Load an existing database(L) : ").upper() #Asking user to create or load a database.
         try:
             #Creating a new database.
@@ -53,10 +33,34 @@ class Expendo():
             
             #Checking for and creating a table if it doesnt exist.
             self.cur.execute("CREATE TABLE IF NOT EXISTS expenses(ID INTEGER PRIMARY KEY AUTOINCREMENT,ID_Date DATETIME DEFAULT CURRENT_TIMESTAMP, Expenditure_TAG TEXT NOT NULL, Expense REAL NOT NULL)")
+            #Saving the changes made.
             self.conn.commit()
+            t.sleep(1)
             print("Loaded/Created {} database!".format(db_name))
         except Exception as e:
             print("There was a program error: ", e)
+
+    #Funtion portraying the menu for Expendo and also taking in the user's input.
+    def user_choice(self):
+        print("""
+        |---------------------------MENU---------------------------|
+        a. Press 1 to to go back MAIN MENU.
+        b. Press 2 to view your expenditure statement.
+        c. Press 3 to add an expenditure. 
+        d. Press 4 to add money saved for the month.
+        e. Press 5 to delete the latest entry.
+        f. Press 6 to update an entry.
+        g. Press 7 for visualization of your financial situation. 
+        h. Press 8 to quit the program.
+        """)
+    
+        try:
+            #User choice to navigate through the menu.
+            choice = int(input("Enter your choice: "))
+            return choice
+        except:
+            print("Please enter a valid key next time!")
+    
     
     #Function to show the user his/her statement log.
     def exp_statement(self):
@@ -72,12 +76,14 @@ class Expendo():
                 print('''
                 |------------------------STATEMENT-------------------------|
                 ''')
+                t.sleep(1)
                 for row in self.cur.execute("SELECT * FROM expenses WHERE ID = (SELECT MAX(ID) FROM expenses)"):
                     print(row)
             elif view_choice == 2: #If the user wants to view hs whole statement log.
                 print('''
                 |------------------------STATEMENT-------------------------|
                 ''')
+                t.sleep(1)
                 for row in self.cur.execute("SELECT * FROM expenses"):
                     print(row)
 
@@ -86,6 +92,7 @@ class Expendo():
                 print('''
                 |------------------------STATEMENT-------------------------|
                 ''')
+                t.sleep(1)
                 for row in self.cur.execute("SELECT * FROM expenses ORDER BY ID DESC LIMIT ?", str(no_of_entries)):
                     print(row)
         except Exception as e:
@@ -102,7 +109,8 @@ class Expendo():
                 #Adding the data.
                 self.cur.execute("INSERT INTO expenses (Expenditure_TAG, Expense) VALUES(?,?)", (Expenditure_TAG, Expenditure))
                 self.conn.commit()
-
+                t.sleep(1)
+                print("Added the expense!")
                 #Addition of more data.
                 continuation = input("Do you want to enter more expenses?[Y/N]: ").upper()
                 if continuation == 'N':
@@ -139,6 +147,7 @@ class Expendo():
                     with open(filepath, 'r') as f:
                         self.bank = f.read()
                         f.close()
+                t.sleep(1)
                 print("Loaded your amount available for the month!")
         
         except Exception as e:
@@ -148,6 +157,7 @@ class Expendo():
     def delete_entry(self):
         try:
             self.cur.execute("DELETE FROM expenses WHERE id = (SELECT MAX(id) FROM expenses)")
+            t.sleep(1)
             print('Deleted the latest entry!')
         except Exception as e:
             print("There was a program error: ", e)
@@ -156,11 +166,28 @@ class Expendo():
     def update_entry(self):
         try:
             update_entry = int(input("Enter the Row ID of the data entry you want to update: "))
-            updated_expense = float(input("Enter the new expense value: "))
-            updated_tag = input("Enter the tag for the expense: ").upper()
-            self.cur.execute("UPDATE expenses SET Expenditure_TAG = ?, Expense = ? where ID = ?", (updated_tag, updated_expense, update_entry))
+            t.sleep(1)
+            print('''
+            a. Press E to update only expense of the row ID selected.
+            b. Press T to update only tag of the row ID selected.
+            c. Press B to update both expense and the tag of the row ID selected. 
+            ''')
+            t.sleep(1)
+            update_choice = input("Enter your choice: ")
+            t.sleep(1)
+            if update_choice == "E":
+                updated_expense = float(input("Enter the new expense value: "))
+                self.cur.execute("UPDATE expenses SET Expense = ? where ID = ?", (updated_expense, update_entry))
+            elif update_choice == "T":
+                updated_tag = input("Enter the tag for the expense: ").upper()
+                self.cur.execute("UPDATE expenses SET Expenditure_TAG = ? where ID = ?", (updated_tag, update_entry))
+            elif update_choice == "B":
+                updated_expense = float(input("Enter the new expense value: "))
+                updated_tag = input("Enter the tag for the expense: ").upper()
+                self.cur.execute("UPDATE expenses SET Expenditure_TAG = ?, Expense = ? where ID = ?", (updated_tag, updated_expense, update_entry))
             self.conn.commit()
-            print("Updated the emtry!")
+            t.sleep(1)
+            print("Updated the entry!")
         except Exception as e:
             print("There was a program error: ", e)
     
@@ -173,7 +200,8 @@ class Expendo():
             b. Press 2 to see a pie-chart of all your spendings categorised by their tags.
             c. Press 3 to see a pie-chart of your spendings vs your monthly bank.
             ''')
-            visual_choice = int(input("Enter yuor choice: "))
+            t.sleep(1)
+            visual_choice = int(input("Enter your choice: "))
             labels = []
             values = []
             if visual_choice == 1:
@@ -206,6 +234,7 @@ class Expendo():
                 plt.title("Allowance VS Expenditure")
                 for a,b in zip(y_list, p_labels):
                     plt.text(a,b,str(a))
+            t.sleep(1)
             plt.show()
         
         except Exception as e:
