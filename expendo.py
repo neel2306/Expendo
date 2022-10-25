@@ -1,5 +1,4 @@
 import os
-import time as t
 import sqlite3 as sq 
 from matplotlib import pyplot as plt 
 
@@ -35,7 +34,6 @@ class Expendo():
             self.cur.execute("CREATE TABLE IF NOT EXISTS expenses(ID INTEGER PRIMARY KEY AUTOINCREMENT,ID_Date DATETIME DEFAULT CURRENT_TIMESTAMP, Expenditure_TAG TEXT NOT NULL, Expense REAL NOT NULL)")
             #Saving the changes made.
             self.conn.commit()
-            t.sleep(1)
             print("Loaded/Created {} database!".format(db_name))
         except Exception as e:
             print("There was a program error: ", e)
@@ -76,14 +74,12 @@ class Expendo():
                 print('''
                 |------------------------STATEMENT-------------------------|
                 ''')
-                t.sleep(1)
                 for row in self.cur.execute("SELECT * FROM expenses WHERE ID = (SELECT MAX(ID) FROM expenses)"):
                     print(row)
             elif view_choice == 2: #If the user wants to view hs whole statement log.
                 print('''
                 |------------------------STATEMENT-------------------------|
                 ''')
-                t.sleep(1)
                 for row in self.cur.execute("SELECT * FROM expenses"):
                     print(row)
 
@@ -92,7 +88,6 @@ class Expendo():
                 print('''
                 |------------------------STATEMENT-------------------------|
                 ''')
-                t.sleep(1)
                 for row in self.cur.execute("SELECT * FROM expenses ORDER BY ID DESC LIMIT ?", str(no_of_entries)):
                     print(row)
         except Exception as e:
@@ -109,7 +104,6 @@ class Expendo():
                 #Adding the data.
                 self.cur.execute("INSERT INTO expenses (Expenditure_TAG, Expense) VALUES(?,?)", (Expenditure_TAG, Expenditure))
                 self.conn.commit()
-                t.sleep(1)
                 print("Added the expense!")
                 #Addition of more data.
                 continuation = input("Do you want to enter more expenses?[Y/N]: ").upper()
@@ -147,7 +141,6 @@ class Expendo():
                     with open(filepath, 'r') as f:
                         self.bank = f.read()
                         f.close()
-                t.sleep(1)
                 print("Loaded your amount available for the month!")
         
         except Exception as e:
@@ -157,7 +150,6 @@ class Expendo():
     def delete_entry(self):
         try:
             self.cur.execute("DELETE FROM expenses WHERE id = (SELECT MAX(id) FROM expenses)")
-            t.sleep(1)
             print('Deleted the latest entry!')
         except Exception as e:
             print("There was a program error: ", e)
@@ -166,15 +158,12 @@ class Expendo():
     def update_entry(self):
         try:
             update_entry = int(input("Enter the Row ID of the data entry you want to update: "))
-            t.sleep(1)
             print('''
             a. Press E to update only expense of the row ID selected.
             b. Press T to update only tag of the row ID selected.
             c. Press B to update both expense and the tag of the row ID selected. 
             ''')
-            t.sleep(1)
             update_choice = input("Enter your choice: ")
-            t.sleep(1)
             if update_choice == "E":
                 updated_expense = float(input("Enter the new expense value: "))
                 self.cur.execute("UPDATE expenses SET Expense = ? where ID = ?", (updated_expense, update_entry))
@@ -186,7 +175,6 @@ class Expendo():
                 updated_tag = input("Enter the tag for the expense: ").upper()
                 self.cur.execute("UPDATE expenses SET Expenditure_TAG = ?, Expense = ? where ID = ?", (updated_tag, updated_expense, update_entry))
             self.conn.commit()
-            t.sleep(1)
             print("Updated the entry!")
         except Exception as e:
             print("There was a program error: ", e)
@@ -200,7 +188,6 @@ class Expendo():
             b. Press 2 to see a pie-chart of all your spendings categorised by their tags.
             c. Press 3 to see a pie-chart of your spendings vs your monthly bank.
             ''')
-            t.sleep(1)
             visual_choice = int(input("Enter your choice: "))
             labels = []
             values = []
@@ -220,21 +207,20 @@ class Expendo():
                     for i in range(1,len(row)+1,2):
                         labels.append(row[i-1])
                         values.append(row[i])
-                plt.pie(values, labels = labels)
-                plt.title("Expenditure Category")
-                for a,b in zip(values, labels):
-                    plt.text(a,b,str(a))
+                fig,ax = plt.subplots(figsize = (6,6))
+                ax.pie(values, labels = labels, autopct = '%1.1f%%')
+                ax.set_title("Expenditure Category")
+                plt.tight_layout()
             elif visual_choice == 3:
                 for row in self.cur.execute("SELECT TOTAL(Expense) FROM expenses"):
                     agg_expense = row[0]
                 #List of attributes to be plotted.
                 y_list = [self.bank, agg_expense]
                 p_labels = ["Money Bank", "Expenses"]
-                plt.pie(y_list, labels=p_labels)
-                plt.title("Allowance VS Expenditure")
-                for a,b in zip(y_list, p_labels):
-                    plt.text(a,b,str(a))
-            t.sleep(1)
+                fig,ax = plt.subplots(figsize = (6,6))
+                ax.pie(y_list, labels=p_labels, autopct = "%1.1f%%")
+                ax.set_title("Allowance VS Expenditure")
+                plt.tight_layout()
             plt.show()
         
         except Exception as e:
